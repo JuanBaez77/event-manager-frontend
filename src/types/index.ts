@@ -5,18 +5,22 @@ export interface User {
   rol: string
 }
 
+export interface Categoria {
+  id: number
+  nombre: string
+  descripcion?: string
+}
+
 export interface Event {
   id: number
-  title: string
-  description: string
-  date: string
-  location: string
-  capacity: number
-  price: number
-  status: 'active' | 'inactive' | 'cancelled'
-  created_by: number
-  created_at: string
-  updated_at: string
+  nombre: string
+  descripcion: string
+  fecha_inicio: string
+  fecha_fin: string
+  lugar: string
+  cupos: number
+  categoria_id?: number
+  categoria?: Categoria
 }
 
 export interface ApiResponse<T> {

@@ -101,4 +101,56 @@ export const userService = {
   },
 }
 
+// --- Servicios de eventos ---
+export const eventService = {
+  getAll: async (params?: any) => {
+    const response = await api.get('/eventos', { params })
+    return response.data
+  },
+  search: async (q: string) => {
+    const response = await api.get('/eventos/buscar', { params: { q } })
+    return response.data
+  },
+  getById: async (id: number) => {
+    const response = await api.get(`/eventos/${id}`)
+    return response.data
+  },
+  create: async (data: any) => {
+    const response = await api.post('/eventos', data)
+    return response.data
+  },
+  update: async (id: number, data: any) => {
+    const response = await api.put(`/eventos/${id}`, data)
+    return response.data
+  },
+  delete: async (id: number) => {
+    const response = await api.delete(`/eventos/${id}`)
+    return response.data
+  },
+}
+
+// --- Servicios de categorías ---
+export const categoriaService = {
+  getAll: async () => {
+    const response = await api.get('/categorias')
+    return response.data
+  },
+  getById: async (id: number) => {
+    const response = await api.get(`/categorias/${id}`)
+    return response.data
+  },
+  create: async (data: any) => {
+    const response = await api.post('/categorias', data)
+    return response.data
+  },
+  update: async (id: number, data: any) => {
+    const response = await api.put(`/categorias/${id}`, data)
+    return response.data
+  },
+  delete: async (id: number) => {
+    const response = await api.delete(`/categorias/${id}`)
+    return response.data
+  },
+}
+
 export default api 
