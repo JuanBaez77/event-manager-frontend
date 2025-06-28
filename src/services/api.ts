@@ -1,5 +1,7 @@
 import axios from 'axios'
+import { User } from '../types'
 
+// @ts-ignore
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const api = axios.create({
@@ -60,6 +62,42 @@ export const authService = {
   getCurrentUser: () => {
     const user = localStorage.getItem('user')
     return user ? JSON.parse(user) : null
+  },
+}
+
+// --- Servicios de usuarios ---
+export const userService = {
+  getAll: async (params?: any) => {
+    const response = await api.get('/usuarios', { params })
+    return response.data
+  },
+  search: async (email: string) => {
+    const response = await api.get('/usuarios/buscar', { params: { email } })
+    return response.data
+  },
+  getById: async (id: number) => {
+    const response = await api.get(`/usuarios/${id}`)
+    return response.data
+  },
+  create: async (data: any) => {
+    const response = await api.post('/usuarios', data)
+    return response.data
+  },
+  update: async (id: number, data: any) => {
+    const response = await api.put(`/usuarios/${id}`, data)
+    return response.data
+  },
+  delete: async (id: number) => {
+    const response = await api.delete(`/usuarios/${id}`)
+    return response.data
+  },
+  getByRole: async (rol: string, params?: any) => {
+    const response = await api.get(`/usuarios/rol/${rol}`, { params })
+    return response.data
+  },
+  getStats: async () => {
+    const response = await api.get('/usuarios/stats/count')
+    return response.data
   },
 }
 
