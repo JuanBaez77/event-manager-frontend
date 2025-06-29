@@ -127,6 +127,22 @@ export const eventService = {
     const response = await api.delete(`/eventos/${id}`)
     return response.data
   },
+  getDisponibles: async () => {
+    const response = await api.get('/eventos/disponibles');
+    return response.data;
+  },
+  buscar: async (q: string) => {
+    const response = await api.get('/eventos/buscar', { params: { q } });
+    return response.data;
+  },
+  getByCategoria: async (categoria_id: number) => {
+    const response = await api.get(`/eventos/categoria/${categoria_id}`);
+    return response.data;
+  },
+  getTodos: async () => {
+    const response = await api.get('/eventos/todos');
+    return response.data;
+  },
 }
 
 // --- Servicios de categorías ---
@@ -152,5 +168,43 @@ export const categoriaService = {
     return response.data
   },
 }
+
+export const inscripcionService = {
+  getAll: async () => {
+    const response = await api.get('/inscripciones');
+    return response.data;
+  },
+  getById: async (id: number) => {
+    const response = await api.get(`/inscripciones/${id}`);
+    return response.data;
+  },
+  create: async (data: any) => {
+    const response = await api.post('/inscripciones', data);
+    return response.data;
+  },
+  update: async (id: number, data: any) => {
+    const response = await api.put(`/inscripciones/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: number) => {
+    const response = await api.delete(`/inscripciones/${id}`);
+    return response.data;
+  },
+  getActivasByUser: async (usuario_id: number) => {
+    const response = await api.get(`/inscripciones/activas/${usuario_id}`);
+    return response.data;
+  },
+  getHistorialByUser: async (usuario_id: number) => {
+    const response = await api.get(`/inscripciones/historial/${usuario_id}`);
+    return response.data;
+  },
+};
+
+export const statsService = {
+  getDashboardStats: async () => {
+    const response = await api.get('/stats/dashboard');
+    return response.data;
+  },
+};
 
 export default api 

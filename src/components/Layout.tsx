@@ -16,6 +16,7 @@ import {
   ListItemText,
   Avatar,
   Divider,
+  useTheme as useMuiTheme,
 } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
@@ -27,9 +28,12 @@ import {
   NotificationsNone,
   Logout,
   AccountCircle,
+  Brightness4,
+  Brightness7,
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../contexts/ThemeContext'
 
 const drawerWidth = 240
 
@@ -74,6 +78,8 @@ const Layout: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, isAuthenticated, logout, isLoading } = useAuth()
+  const { isDarkMode, toggleTheme } = useTheme()
+  const muiTheme = useMuiTheme()
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && location.pathname !== '/login') {
@@ -105,8 +111,8 @@ const Layout: React.FC = () => {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
-            background: '#fff',
-            borderRight: '1px solid #e3e3e3',
+            background: muiTheme.palette.background.paper,
+            borderRight: `1px solid ${muiTheme.palette.divider}`,
           },
         }}
       >
@@ -141,13 +147,16 @@ const Layout: React.FC = () => {
         </List>
       </Drawer>
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #e3e3e3' }}>
+        <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: `1px solid ${muiTheme.palette.divider}` }}>
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, color: 'primary.main' }}>
               {/* Puedes mostrar el nombre de la sección aquí si lo deseas */}
             </Typography>
             {isAuthenticated && user && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#f7fafd', borderRadius: 5, px: 2, py: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, bgcolor: muiTheme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#f7fafd', borderRadius: 5, px: 2, py: 0.5 }}>
+                <IconButton onClick={toggleTheme} color="primary">
+                  {isDarkMode ? <Brightness7 /> : <Brightness4 />}
+                </IconButton>
                 <IconButton color="primary">
                   <MailOutline />
                 </IconButton>
@@ -189,7 +198,7 @@ const Layout: React.FC = () => {
             )}
           </Toolbar>
         </AppBar>
-        <Box component="main" sx={{ flexGrow: 1, pl: 2, pr: 2, pt: 2, background: '#f6fbff', minHeight: '100vh' }}>
+        <Box component="main" sx={{ flexGrow: 1, pl: 2, pr: 2, pt: 2, background: muiTheme.palette.background.default, minHeight: '100vh' }}>
           <Outlet />
         </Box>
       </Box>

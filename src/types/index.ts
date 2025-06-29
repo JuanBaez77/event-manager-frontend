@@ -35,4 +35,11 @@ export interface PaginatedResponse<T> {
   page: number
   per_page: number
   total_pages: number
+}
+
+export interface Inscripcion {
+  id: number;
+  evento_id: number;
+  usuario_id: number;
+  fecha_inscripcion: string;
 } 

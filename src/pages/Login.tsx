@@ -9,6 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
   Divider,
+  useTheme,
 } from '@mui/material'
 import { Visibility, VisibilityOff, Google } from '@mui/icons-material'
 import { useForm } from 'react-hook-form'
@@ -26,6 +27,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
+  const theme = useTheme()
 
   const {
     register,
@@ -52,7 +54,7 @@ const Login: React.FC = () => {
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        backgroundColor: '#1E1E1E',
+        backgroundColor: theme.palette.background.default,
         alignItems: 'center',
         justifyContent: 'center',
         px: 2,
@@ -66,7 +68,7 @@ const Login: React.FC = () => {
           maxWidth: 1000,
           width: '100%',
           boxShadow: 3,
-          backgroundColor: '#fff',
+          backgroundColor: theme.palette.background.paper,
         }}
       >
         {/* Imagen a la izquierda */}
@@ -93,7 +95,7 @@ const Login: React.FC = () => {
         >
           {/* Logo y bienvenida */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h4" fontWeight={700}>
+            <Typography variant="h4" fontWeight={700} color="primary">
               Event Manager
             </Typography>
           </Box>
@@ -163,7 +165,7 @@ const Login: React.FC = () => {
           </form>
 
           <Typography variant="body2" align="center" mt={4}>
-            Don’t have an account?{' '}
+            Don't have an account?{' '}
             <Button size="small">Sign up now</Button>
           </Typography>
         </Box>

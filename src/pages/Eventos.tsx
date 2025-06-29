@@ -44,21 +44,21 @@ const Eventos: React.FC = () => {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Partial<Event>>(initialForm)
   const [editId, setEditId] = useState<number | null>(null)
+  const [categoriaFiltro, setCategoriaFiltro] = useState('')
 
   const fetchEventos = async () => {
-    let data = []
+    let data = [];
+    data = await eventService.getTodos();
+    if (categoriaFiltro !== '') {
+      data = data.filter((e: Event) => String(e.categoria_id) === categoriaFiltro);
+    }
     if (search) {
-      data = await eventService.getAll()
       data = data.filter((e: Event) =>
         e.nombre.toLowerCase().includes(search.toLowerCase()) ||
         e.descripcion.toLowerCase().includes(search.toLowerCase())
-      )
-    } else if (estado) {
-      data = await eventService.getAll()
-    } else {
-      data = await eventService.getAll()
+      );
     }
-    setEventos(data)
+    setEventos(data);
   }
 
   const fetchCategorias = async () => {
@@ -70,7 +70,7 @@ const Eventos: React.FC = () => {
     fetchEventos()
     fetchCategorias()
     // eslint-disable-next-line
-  }, [search, estado])
+  }, [search, estado, categoriaFiltro])
 
   const handleOpen = (evento?: Event) => {
     if (evento) {
@@ -139,6 +139,19 @@ const Eventos: React.FC = () => {
             <MenuItem value="activo">Activo</MenuItem>
             <MenuItem value="inactivo">Inactivo</MenuItem>
             <MenuItem value="cancelado">Cancelado</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Categoría</InputLabel>
+          <Select
+            value={categoriaFiltro}
+            label="Categoría"
+            onChange={e => setCategoriaFiltro(e.target.value)}
+          >
+            <MenuItem value="">Todas</MenuItem>
+            {categorias.map((cat) => (
+              <MenuItem key={cat.id} value={String(cat.id)}>{cat.nombre}</MenuItem>
+            ))}
           </Select>
         </FormControl>
         <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>Agregar</Button>

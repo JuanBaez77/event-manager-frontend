@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import { ThemeProvider } from './contexts/ThemeContext'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Usuarios from './pages/Usuarios'
@@ -9,16 +10,18 @@ import Layout from './components/Layout'
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="usuarios" element={<Usuarios />} />
-        <Route path="eventos" element={<Eventos />} />
-        <Route path="categorias" element={<Categorias />} />
-        <Route path="inscripciones" element={<Inscripciones />} />
-      </Route>
-    </Routes>
+    <ThemeProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="usuarios" element={<Usuarios />} />
+          <Route path="eventos" element={<Eventos />} />
+          <Route path="categorias" element={<Categorias />} />
+          <Route path="inscripciones" element={<Inscripciones />} />
+        </Route>
+      </Routes>
+    </ThemeProvider>
   )
 }
 
