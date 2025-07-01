@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Typography, Paper, Grid, CircularProgress, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
+import { Box, Typography, Paper, Grid, CircularProgress, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar } from '@mui/material'
 import { Event as EventIcon, People as PeopleIcon, TrendingUp as TrendingUpIcon, Star as StarIcon } from '@mui/icons-material'
 import { statsService, eventService, inscripcionService } from '../services/api'
 import { Event, Inscripcion } from '../types'
@@ -46,20 +46,6 @@ const Dashboard: React.FC = () => {
   const fetchEventosDisponibles = async () => {
     const data = await eventService.getDisponibles()
     setEventosDisponibles(data)
-  }
-
-  const handleBuscar = async () => {
-    if (busqueda.trim()) {
-      const data = await eventService.buscar(busqueda)
-      setResultadosBusqueda(data)
-    }
-  }
-
-  const handleBuscarCategoria = async () => {
-    if (categoria) {
-      const data = await eventService.getByCategoria(Number(categoria))
-      setEventosCategoria(data)
-    }
   }
 
   const fetchInscripcionesActivas = async () => {
@@ -171,13 +157,64 @@ const Dashboard: React.FC = () => {
         <Grid item xs={12} md={4}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {eventosDisponibles.map((evento) => (
-              <Paper key={evento.id} sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="h6" color="primary" fontWeight="bold">{evento.nombre}</Typography>
-                <Typography variant="body2" color="text.secondary">{evento.descripcion}</Typography>
-                <Typography variant="body2">Fecha: {evento.fecha_inicio} a {evento.fecha_fin}</Typography>
-                <Typography variant="body2">Lugar: {evento.lugar}</Typography>
-                <Typography variant="body2">Cupos: {evento.cupos}</Typography>
-                <Typography variant="body2" color={eventosInscriptoIds.has(evento.id) ? 'success.main' : 'error.main'} fontWeight="bold">
+              <Paper
+                key={evento.id}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  boxShadow: 3,
+                  background: (theme) => theme.palette.mode === 'dark' ? '#23272f' : '#fff',
+                  minHeight: 200,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                }}
+              >
+                <Box>
+                  <Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5 }}>
+                    {evento.nombre}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    {evento.descripcion}
+                  </Typography>
+                  {evento.categoria?.nombre && (
+                    <Box sx={{ display: 'inline-block', mb: 1 }}>
+                      <Box
+                        sx={{
+                          display: 'inline-block',
+                          px: 1.5,
+                          py: 0.5,
+                          bgcolor: 'primary.light',
+                          color: 'primary.dark',
+                          borderRadius: 2,
+                          fontSize: 13,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {evento.categoria.nombre}
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <span role="img" aria-label="inscritos">👥</span>
+                      <Typography variant="body2">{evento.cupos} cupos</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <span role="img" aria-label="fecha">📅</span>
+                      <Typography variant="body2">{evento.fecha_inicio}</Typography>
+                    </Box>
+                  </Box>
+                  <Box>
+                    <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 16 }}>
+                      {evento.nombre ? evento.nombre[0] : 'E'}
+                    </Avatar>
+                  </Box>
+                </Box>
+                <Typography variant="body2" sx={{ mt: 1 }} color={eventosInscriptoIds.has(evento.id) ? 'success.main' : 'error.main'} fontWeight="bold">
                   {eventosInscriptoIds.has(evento.id) ? 'Inscripto' : 'No inscripto'}
                 </Typography>
               </Paper>

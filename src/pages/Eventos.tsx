@@ -25,6 +25,7 @@ import {
 import { Edit, Delete, Add } from '@mui/icons-material'
 import { eventService, categoriaService } from '../services/api'
 import { Event, Categoria } from '../types'
+import { useAuth } from '../hooks/useAuth'
 
 const initialForm: Partial<Event> = {
   nombre: '',
@@ -37,10 +38,11 @@ const initialForm: Partial<Event> = {
 }
 
 const Eventos: React.FC = () => {
+  const { user } = useAuth()
   const [eventos, setEventos] = useState<Event[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [search, setSearch] = useState('')
-  const [estado, setEstado] = useState('')
+  const [estado] = useState('')
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Partial<Event>>(initialForm)
   const [editId, setEditId] = useState<number | null>(null)
@@ -132,15 +134,6 @@ const Eventos: React.FC = () => {
           onChange={(e) => setSearch(e.target.value)}
           size="small"
         />
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Estado</InputLabel>
-          <Select value={estado} label="Estado" onChange={(e) => setEstado(e.target.value as string)}>
-            <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="activo">Activo</MenuItem>
-            <MenuItem value="inactivo">Inactivo</MenuItem>
-            <MenuItem value="cancelado">Cancelado</MenuItem>
-          </Select>
-        </FormControl>
         <FormControl size="small" sx={{ minWidth: 180 }}>
           <InputLabel>Categoría</InputLabel>
           <Select
@@ -154,7 +147,9 @@ const Eventos: React.FC = () => {
             ))}
           </Select>
         </FormControl>
-        <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>Agregar</Button>
+        {user?.rol === 'Administrador' && (
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>Agregar</Button>
+        )}
       </Box>
       <TableContainer component={Paper}>
         <Table>
@@ -181,84 +176,89 @@ const Eventos: React.FC = () => {
                 <TableCell>{e.cupos}</TableCell>
                 <TableCell>{e.categoria?.nombre || ''}</TableCell>
                 <TableCell align="right">
-                  <IconButton color="primary" onClick={() => handleOpen(e)}><Edit /></IconButton>
-                  <IconButton color="error" onClick={() => handleDelete(e.id)}><Delete /></IconButton>
+                  {user?.rol === 'Administrador' && (
+                    <>
+                      <IconButton color="primary" onClick={() => handleOpen(e)}><Edit /></IconButton>
+                      <IconButton color="error" onClick={() => handleDelete(e.id)}><Delete /></IconButton>
+                    </>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{editId ? 'Editar Evento' : 'Agregar Evento'}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <TextField
-            label="Nombre"
-            name="nombre"
-            value={form.nombre}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            label="Descripción"
-            name="descripcion"
-            value={form.descripcion}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            label="Fecha Inicio"
-            name="fecha_inicio"
-            type="date"
-            value={form.fecha_inicio}
-            onChange={handleChange}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            label="Fecha Fin"
-            name="fecha_fin"
-            type="date"
-            value={form.fecha_fin}
-            onChange={handleChange}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            label="Lugar"
-            name="lugar"
-            value={form.lugar}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            label="Cupos"
-            name="cupos"
-            type="number"
-            value={form.cupos}
-            onChange={handleChange}
-            fullWidth
-          />
-          <FormControl fullWidth>
-            <InputLabel>Categoría</InputLabel>
-            <Select
-              name="categoria_id"
-              value={form.categoria_id !== undefined ? String(form.categoria_id) : ''}
-              label="Categoría"
-              onChange={handleSelectChange}
-            >
-              <MenuItem value="">Sin categoría</MenuItem>
-              {categorias.map((cat) => (
-                <MenuItem key={cat.id} value={String(cat.id)}>{cat.nombre}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave} variant="contained">Guardar</Button>
-        </DialogActions>
-      </Dialog>
+      {user?.rol === 'Administrador' && (
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{editId ? 'Editar Evento' : 'Agregar Evento'}</DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <TextField
+              label="Nombre"
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Descripción"
+              name="descripcion"
+              value={form.descripcion}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Fecha de inicio"
+              name="fecha_inicio"
+              type="date"
+              value={form.fecha_inicio}
+              onChange={handleChange}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="Fecha de fin"
+              name="fecha_fin"
+              type="date"
+              value={form.fecha_fin}
+              onChange={handleChange}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="Lugar"
+              name="lugar"
+              value={form.lugar}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Cupos"
+              name="cupos"
+              type="number"
+              value={form.cupos}
+              onChange={handleChange}
+              fullWidth
+            />
+            <FormControl fullWidth>
+              <InputLabel>Categoría</InputLabel>
+              <Select
+                name="categoria_id"
+                value={form.categoria_id?.toString() ?? ''}
+                label="Categoría"
+                onChange={handleSelectChange}
+              >
+                {categorias.map((cat) => (
+                  <MenuItem key={cat.id} value={cat.id}>{cat.nombre}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button onClick={handleSave} variant="contained">Guardar</Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   )
 }

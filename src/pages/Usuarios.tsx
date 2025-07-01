@@ -39,12 +39,17 @@ const Usuarios: React.FC = () => {
 
   const fetchUsuarios = async () => {
     let data = []
-    if (search) {
-      data = await userService.search(search)
-    } else if (rol) {
+    if (rol) {
       data = await userService.getByRole(rol)
     } else {
       data = await userService.getAll()
+    }
+    if (search) {
+      const searchLower = search.toLowerCase()
+      data = data.filter((u: User) =>
+        (u.email && u.email.toLowerCase().includes(searchLower)) ||
+        (u.nombre && u.nombre.toLowerCase().includes(searchLower))
+      )
     }
     setUsuarios(data)
   }
@@ -81,6 +86,9 @@ const Usuarios: React.FC = () => {
 
   const handleSelectChange = (e: SelectChangeEvent) => {
     const { name, value } = e.target
+    if (name === 'rol') {
+      setRol(value)
+    }
     setForm((prev) => ({ ...prev, [name as string]: value }))
   }
 

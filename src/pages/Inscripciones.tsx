@@ -21,14 +21,17 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
+  Alert,
 } from '@mui/material'
 import { Edit, Delete, Add } from '@mui/icons-material'
 import { inscripcionService, userService, eventService } from '../services/api'
 import { Inscripcion, User, Event } from '../types'
+import { useAuth } from '../hooks/useAuth'
 
 const initialForm: Partial<Inscripcion> = { usuario_id: undefined, evento_id: undefined, fecha_inscripcion: '' }
 
 const Inscripciones: React.FC = () => {
+  const { user } = useAuth()
   const [inscripciones, setInscripciones] = useState<Inscripcion[]>([])
   const [usuarios, setUsuarios] = useState<User[]>([])
   const [eventos, setEventos] = useState<Event[]>([])
@@ -36,9 +39,14 @@ const Inscripciones: React.FC = () => {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<Partial<Inscripcion>>(initialForm)
   const [editId, setEditId] = useState<number | null>(null)
+  const [usuarioFiltro, setUsuarioFiltro] = useState('')
+  const [errorCupo, setErrorCupo] = useState('')
 
   const fetchInscripciones = async () => {
     let data = await inscripcionService.getAll()
+    if (usuarioFiltro) {
+      data = data.filter((i: Inscripcion) => i.usuario_id === Number(usuarioFiltro))
+    }
     if (search) {
       data = data.filter((i: Inscripcion) => {
         const usuario = usuarios.find(u => u.id === i.usuario_id)
@@ -70,14 +78,14 @@ const Inscripciones: React.FC = () => {
   useEffect(() => {
     fetchInscripciones()
     // eslint-disable-next-line
-  }, [search, usuarios, eventos])
+  }, [search, usuarios, eventos, usuarioFiltro])
 
   const handleOpen = (inscripcion?: Inscripcion) => {
     if (inscripcion) {
       setForm(inscripcion)
       setEditId(inscripcion.id)
     } else {
-      setForm(initialForm)
+      setForm(user?.rol === 'Cliente' ? { ...initialForm, usuario_id: user.id } : initialForm)
       setEditId(null)
     }
     setOpen(true)
@@ -100,13 +108,32 @@ const Inscripciones: React.FC = () => {
   }
 
   const handleSave = async () => {
-    if (editId) {
-      await inscripcionService.update(editId, form)
-    } else {
-      await inscripcionService.create(form)
+    setErrorCupo('')
+    if (!editId) {
+      const evento = eventos.find(e => e.id === form.evento_id)
+      if (evento) {
+        const inscriptos = inscripciones.filter(i => i.evento_id === evento.id).length
+        if (inscriptos >= evento.cupos) {
+          setErrorCupo('No hay cupos disponibles para este evento.')
+          return
+        }
+      }
     }
-    fetchInscripciones()
-    handleClose()
+    try {
+      if (editId) {
+        await inscripcionService.update(editId, form)
+      } else {
+        await inscripcionService.create(form)
+      }
+      fetchInscripciones()
+      handleClose()
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.detail) {
+        setErrorCupo(error.response.data.detail)
+      } else {
+        setErrorCupo('Error al guardar la inscripción.')
+      }
+    }
   }
 
   const handleDelete = async (id: number) => {
@@ -124,6 +151,19 @@ const Inscripciones: React.FC = () => {
           onChange={(e) => setSearch(e.target.value)}
           size="small"
         />
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Filtrar por usuario</InputLabel>
+          <Select
+            value={usuarioFiltro}
+            label="Filtrar por usuario"
+            onChange={e => setUsuarioFiltro(e.target.value)}
+          >
+            <MenuItem value="">Todos</MenuItem>
+            {usuarios.map((u) => (
+              <MenuItem key={u.id} value={u.id}>{u.nombre}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>Agregar</Button>
       </Box>
       <TableContainer component={Paper}>
@@ -158,19 +198,29 @@ const Inscripciones: React.FC = () => {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{editId ? 'Editar Inscripción' : 'Agregar Inscripción'}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <FormControl fullWidth>
-            <InputLabel>Usuario</InputLabel>
-            <Select
-              name="usuario_id"
-              value={form.usuario_id?.toString() ?? ''}
+          {errorCupo && <Alert severity="error">{errorCupo}</Alert>}
+          {user?.rol === 'Administrador' ? (
+            <FormControl fullWidth>
+              <InputLabel>Usuario</InputLabel>
+              <Select
+                name="usuario_id"
+                value={form.usuario_id?.toString() ?? ''}
+                label="Usuario"
+                onChange={handleSelectChange}
+              >
+                {usuarios.map((u) => (
+                  <MenuItem key={u.id} value={u.id}>{u.nombre}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <TextField
               label="Usuario"
-              onChange={handleSelectChange}
-            >
-              {usuarios.map((u) => (
-                <MenuItem key={u.id} value={u.id}>{u.nombre}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              value={user?.nombre}
+              disabled
+              fullWidth
+            />
+          )}
           <FormControl fullWidth>
             <InputLabel>Evento</InputLabel>
             <Select

@@ -20,10 +20,12 @@ import {
 import { Edit, Delete, Add } from '@mui/icons-material'
 import { categoriaService } from '../services/api'
 import { Categoria } from '../types'
+import { useAuth } from '../hooks/useAuth'
 
 const initialForm: Partial<Categoria> = { nombre: '', descripcion: '' }
 
 const Categorias: React.FC = () => {
+  const { user } = useAuth()
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
@@ -90,7 +92,9 @@ const Categorias: React.FC = () => {
           onChange={(e) => setSearch(e.target.value)}
           size="small"
         />
-        <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>Agregar</Button>
+        {user?.rol === 'Administrador' && (
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpen()}>Agregar</Button>
+        )}
       </Box>
       <TableContainer component={Paper}>
         <Table>
@@ -107,37 +111,43 @@ const Categorias: React.FC = () => {
                 <TableCell>{c.nombre}</TableCell>
                 <TableCell>{c.descripcion}</TableCell>
                 <TableCell align="right">
-                  <IconButton color="primary" onClick={() => handleOpen(c)}><Edit /></IconButton>
-                  <IconButton color="error" onClick={() => handleDelete(c.id)}><Delete /></IconButton>
+                  {user?.rol === 'Administrador' && (
+                    <>
+                      <IconButton color="primary" onClick={() => handleOpen(c)}><Edit /></IconButton>
+                      <IconButton color="error" onClick={() => handleDelete(c.id)}><Delete /></IconButton>
+                    </>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{editId ? 'Editar Categoría' : 'Agregar Categoría'}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <TextField
-            label="Nombre"
-            name="nombre"
-            value={form.nombre}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            label="Descripción"
-            name="descripcion"
-            value={form.descripcion}
-            onChange={handleChange}
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSave} variant="contained">Guardar</Button>
-        </DialogActions>
-      </Dialog>
+      {user?.rol === 'Administrador' && (
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{editId ? 'Editar Categoría' : 'Agregar Categoría'}</DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <TextField
+              label="Nombre"
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              label="Descripción"
+              name="descripcion"
+              value={form.descripcion}
+              onChange={handleChange}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button onClick={handleSave} variant="contained">Guardar</Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   )
 }
